@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  basePath: "/astrast-dev",
+  basePath: "/website",
   output: "export",
   images: {
     dangerouslyAllowSVG: true,
