@@ -370,14 +370,6 @@ export default function Home() {
               {
                 title: 'Donation Option',
                 description: 'Instantly qualify for a server by donating $1.'
-              },
-              {
-                title: 'Account Creation',
-                description: 'Create an account by registering in #📚┃ticket.'
-              },
-              {
-                title: 'Server Creation',
-                description: 'Once qualified, you can set up your server by opening a register ticket in #📚┃ticket.'
               }
             ].map((service, index) => (
               <motion.div
