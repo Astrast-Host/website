@@ -79,7 +79,7 @@ export default function Home() {
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-4">
                 <Image
-                  src="/images/astrast_1.png"
+                  src="https://astrast.com/Images/astrast_1.png"
                   alt="Astrast Host Logo"
                   width={32}
                   height={32}
