@@ -163,7 +163,7 @@ export default function Home() {
                   transition={{ delay: 0.3 }}
                   className="mt-6 text-xl leading-8 text-white/80"
                 >
-                  Your one-stop solution for premium hosting services
+                  Your one-stop solution for premium hosting services : All For Free
                 </motion.p>
                 <motion.div 
                   initial={{ opacity: 0 }}
