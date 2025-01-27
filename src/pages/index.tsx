@@ -109,19 +109,6 @@ export default function Home() {
                   </MenubarMenu>
 
                   <MenubarSeparator className="bg-white/20" />
-
-                  <MenubarMenu>
-                    <MenubarTrigger className="font-medium text-white/80 hover:text-white">
-                      Web Host
-                    </MenubarTrigger>
-                    <MenubarContent>
-                      <MenubarItem>
-                        <a href="https://astrast.net/" target="_blank" rel="noopener noreferrer" className="w-full">
-                          Visit Web Host
-                        </a>
-                      </MenubarItem>
-                    </MenubarContent>
-                  </MenubarMenu>
                 </Menubar>
               </div>
               <div className="flex items-center gap-4">
