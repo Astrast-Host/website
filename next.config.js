@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  basePath: "/website",
-  output: "export",
   images: {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
@@ -15,7 +13,7 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'astrast.com',
-        pathname: '/images/**',
+        pathname: '/Images/**',
       },
       {
         protocol: 'https',

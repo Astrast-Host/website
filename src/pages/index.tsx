@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";  // Add this import
 import { Geist } from "next/font/google";
 import { Krona_One } from "next/font/google";
 import { Button } from "@/components/ui/button";
@@ -30,15 +31,31 @@ const kronaOne = Krona_One({
 
 export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     setMousePosition({ x: e.clientX, y: e.clientY });
   }, []);
 
+  const handleToggleAnimations = () => {
+    setAnimationsEnabled(!animationsEnabled);
+  };
+
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [handleMouseMove]);
+
+  useEffect(() => {
+    const isLowEndDevice = () => {
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      return connection && (connection.saveData || connection.effectiveType.includes('2g'));
+    };
+
+    if (isLowEndDevice()) {
+      setAnimationsEnabled(false);
+    }
+  }, []);
 
   const calculateGlow = (cardElement: HTMLElement) => {
     const rect = cardElement.getBoundingClientRect();
@@ -51,7 +68,10 @@ export default function Home() {
 
   return (
     <>
-      <div className={`${geist.variable} ${kronaOne.variable} font-sans min-h-screen bg-background relative`}>
+      <div 
+        className={`${geist.variable} ${kronaOne.variable} font-sans min-h-screen bg-background relative`}
+        data-animations-disabled={!animationsEnabled}
+      >
         {/* Add this gradient background section */}
         <div className="gradient-background">
           <div className="gradient-orb-1" />
@@ -109,14 +129,54 @@ export default function Home() {
                   </MenubarMenu>
 
                   <MenubarSeparator className="bg-white/20" />
+<<<<<<< HEAD
+=======
+
+>>>>>>> ab71c56 (fixed animations and added legal stuff)
                 </Menubar>
               </div>
               <div className="flex items-center gap-4">
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="w-9 px-0"
+                  className="font-medium hover:bg-white/10 transition-all duration-300 flex items-center gap-2"
+                  onClick={handleToggleAnimations}
                 >
+                  {animationsEnabled ? (
+                    <>
+                      <svg 
+                        className="w-4 h-4" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M13 10V3L4 14h7v7l9-11h-7z" 
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">Animations On</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg 
+                        className="w-4 h-4" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" 
+                        />
+                      </svg>
+                      <span className="hidden sm:inline">Animations Off</span>
+                    </>
+                  )}
                 </Button>
                 <Button 
                   size="sm" 
@@ -739,10 +799,20 @@ export default function Home() {
         {/* Footer */}
         <footer className="mt-32 border-t border-white/10 relative z-10 glass-panel">
           <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <p className="text-sm text-center text-white/80">
-              © 2025 Astrast Host | Web Hosting & More @ astrast.net
-            </p>
-          
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center gap-4">
+                <Link href="/legal" className="text-sm text-white/60 hover:text-white">
+                  Legal
+                </Link>
+                <span className="text-white/20">•</span>
+                <Link href="/terms-of-service" className="text-sm text-white/60 hover:text-white">
+                  Terms of Service
+                </Link>
+              </div>
+              <p className="text-sm text-center text-white/80">
+                © 2025 Astrast Host | Web Hosting & More @ astrast.net
+              </p>
+            </div>
           </div>
         </footer>
       </div>
