@@ -48,13 +48,55 @@ export default function Home() {
 
   useEffect(() => {
     const isLowEndDevice = () => {
-      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      return connection && (connection.saveData || connection.effectiveType.includes('2g'));
+      // Check for device memory
+      const hasLowMemory = ('deviceMemory' in navigator) && 
+        // @ts-ignore - deviceMemory exists but TypeScript doesn't know about it
+        navigator.deviceMemory <= 4;
+
+      // Check for hardware concurrency (CPU cores)
+      const hasLowCPU = navigator.hardwareConcurrency <= 4;
+
+      // Check for connection speed
+      const connection = (navigator as any).connection || 
+                        (navigator as any).mozConnection || 
+                        (navigator as any).webkitConnection;
+      
+      const hasLowBandwidth = connection && (
+        connection.saveData ||
+        connection.effectiveType === 'slow-2g' ||
+        connection.effectiveType === '2g' ||
+        connection.effectiveType === '3g'
+      );
+
+      // Check for mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+        .test(navigator.userAgent);
+
+      // If any of these conditions are true, consider it a low-end device
+      return hasLowMemory || hasLowCPU || hasLowBandwidth || isMobile;
     };
 
-    if (isLowEndDevice()) {
-      setAnimationsEnabled(false);
+    const handleConnectionChange = () => {
+      setAnimationsEnabled(!isLowEndDevice());
+    };
+
+    // Initial check
+    setAnimationsEnabled(!isLowEndDevice());
+
+    // Listen for connection changes
+    const connection = (navigator as any).connection || 
+                      (navigator as any).mozConnection || 
+                      (navigator as any).webkitConnection;
+    
+    if (connection) {
+      connection.addEventListener('change', handleConnectionChange);
     }
+
+    return () => {
+      if (connection) {
+        connection.removeEventListener('change', handleConnectionChange);
+      }
+    };
   }, []);
 
   const calculateGlow = (cardElement: HTMLElement) => {
@@ -129,10 +171,6 @@ export default function Home() {
                   </MenubarMenu>
 
                   <MenubarSeparator className="bg-white/20" />
-<<<<<<< HEAD
-=======
-
->>>>>>> ab71c56 (fixed animations and added legal stuff)
                 </Menubar>
               </div>
               <div className="flex items-center gap-4">
