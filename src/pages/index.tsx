@@ -46,9 +46,25 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [handleMouseMove]);
 
+  // Battery status check function
+  const hasLowBattery = async () => {
+    if ('getBattery' in navigator) {
+      try {
+        const battery = await (navigator as any).getBattery();
+        return battery.level <= 0.2 && !battery.charging;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  };
+
   useEffect(() => {
     const isLowEndDevice = () => {
-      // Check for device memory
+      // Check screen dimensions
+      const isSmallScreen = window.innerWidth <= 768 || window.innerHeight <= 600;
+      
+      // Check device memory
       const hasLowMemory = ('deviceMemory' in navigator) && 
         // @ts-ignore - deviceMemory exists but TypeScript doesn't know about it
         navigator.deviceMemory <= 4;
@@ -57,45 +73,106 @@ export default function Home() {
       const hasLowCPU = navigator.hardwareConcurrency <= 4;
 
       // Check for connection speed
-      const connection = (navigator as any).connection || 
-                        (navigator as any).mozConnection || 
-                        (navigator as any).webkitConnection;
+      const networkInfo = (navigator as any).connection || 
+                         (navigator as any).mozConnection || 
+                         (navigator as any).webkitConnection;
       
-      const hasLowBandwidth = connection && (
-        connection.saveData ||
-        connection.effectiveType === 'slow-2g' ||
-        connection.effectiveType === '2g' ||
-        connection.effectiveType === '3g'
+      const hasLowBandwidth = networkInfo && (
+        networkInfo.saveData ||
+        networkInfo.effectiveType === 'slow-2g' ||
+        networkInfo.effectiveType === '2g' ||
+        networkInfo.effectiveType === '3g'
       );
 
-      // Check for mobile device
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
-        .test(navigator.userAgent);
+      // Enhanced mobile detection
+      const isMobileDevice = () => {
+        const mobileKeywords = [
+          /Android/i,
+          /webOS/i,
+          /iPhone/i,
+          /iPad/i,
+          /iPod/i,
+          /BlackBerry/i,
+          /Windows Phone/i,
+          /Mobile/i,
+          /Tablet/i,
+          /IEMobile/i,
+          /Opera Mini/i
+        ];
 
-      // If any of these conditions are true, consider it a low-end device
-      return hasLowMemory || hasLowCPU || hasLowBandwidth || isMobile;
+        const userAgent = navigator.userAgent;
+        return mobileKeywords.some(keyword => keyword.test(userAgent));
+      };
+
+      // Check for low-end GPU
+      const hasLowEndGPU = (): boolean => {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        return !gl;
+      };
+      // Check for reduced motion preference
+      const hasLowBattery = async () => {
+        if ('getBattery' in navigator) {
+          try {
+            const battery = await (navigator as any).getBattery();
+            return battery.level <= 0.2 && !battery.charging;
+          } catch {
+            return false;
+          }
+        }
+        return false;
+      };
+
+      // Check for reduced motion preference
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Combine all checks
+      return (
+        isSmallScreen ||
+        hasLowMemory ||
+        hasLowCPU ||
+        hasLowBandwidth ||
+        isMobileDevice() ||
+        hasLowEndGPU() ||
+        prefersReducedMotion
+      );
     };
 
     const handleConnectionChange = () => {
       setAnimationsEnabled(!isLowEndDevice());
     };
 
+    const handleResize = () => {
+      setAnimationsEnabled(!isLowEndDevice());
+    };
+
     // Initial check
     setAnimationsEnabled(!isLowEndDevice());
 
-    // Listen for connection changes
-    const connection = (navigator as any).connection || 
-                      (navigator as any).mozConnection || 
-                      (navigator as any).webkitConnection;
+    // Event listeners
+    window.addEventListener('resize', handleResize);
     
-    if (connection) {
-      connection.addEventListener('change', handleConnectionChange);
+    const networkConnection = (navigator as any).connection || 
+                            (navigator as any).mozConnection || 
+                            (navigator as any).webkitConnection;
+    
+    if (networkConnection) {
+      networkConnection.addEventListener('change', handleConnectionChange);
     }
 
-    return () => {
-      if (connection) {
-        connection.removeEventListener('change', handleConnectionChange);
+    // Check battery status periodically
+    const batteryCheckInterval = setInterval(async () => {
+      if (await hasLowBattery()) {
+        setAnimationsEnabled(false);
       }
+    }, 60000); // Check every minute
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (networkConnection) {
+        networkConnection.removeEventListener('change', handleConnectionChange);
+      }
+      clearInterval(batteryCheckInterval);
     };
   }, []);
 
